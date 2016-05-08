@@ -1,11 +1,12 @@
-// ==============================================================================================
+// =========================================================
 // Discord Bot Project
 
 console.log("> Discord Bot Project");
-console.log("> " + process.version);
+console.log("> Node.js version: " + process.version);
 console.log("> ");
 
 
+// =========================================================
 // Loading Discord.js
 console.log("> Loading discord.js");
 try {
@@ -18,6 +19,7 @@ try {
 }
 
 
+// =========================================================
 // Loading authentication details
 console.log("> Loading authentication details");
 try {
@@ -30,6 +32,7 @@ try {
 }
 
 
+// =========================================================
 // Loading configurations
 console.log("> Loading configurations");
 try {
@@ -42,36 +45,37 @@ try {
 }
 
 
+// =========================================================
 // Load discord client
 var bot = new discord.Client();
 
 
+// =========================================================
 // When the bot is ready
 bot.on("ready", () => {
  	console.log("> Connected");
  	console.log("> ");
  	console.log("> ======================= BOT SETTINGS ===");
- 	console.log(">        BOT ID: " + bot.user.id);
- 	console.log(">  BOT OWNER ID: " + config.botOwnerID);
- 	console.log(">       SERVERS: " + bot.servers.length);
- 	console.log("> ");
- 	console.log(">       ENABLED: " + config.isEnabled);
- 	console.log("> ");
+ 	console.log(">             BOT ID | " + bot.user.id);
+ 	console.log(">       BOT OWNER ID | " + config.botOwnerID);
+ 	console.log(">  SERVERS CONNECTED | " + bot.servers.length);
+ 	console.log(">                    | ");
+ 	console.log(">            ENABLED | " + config.isEnabled);
+ 	console.log(">                    | ");
  	console.log("> ==================== SERVER SETTINGS ===");
- 	console.log("> SYSTEM PREFIX: " + config.commandPrefixSystem);
- 	console.log(">   USER PREFIX: " + config.commandPrefixUser);
- 	console.log("> ");
- 	console.log("> ADMIN ROLE ID: " + config.roleIDAdministrator);
- 	console.log(">   MOD ROLE ID: " + config.roleIDModerator);
+ 	console.log(">      SYSTEM PREFIX | " + config.commandPrefixSystem);
+ 	console.log(">      NORMAL PREFIX | " + config.commandPrefixNormal);
+ 	console.log(">                    | ");
+ 	console.log(">      ADMIN ROLE ID | " + config.roleIDAdministrator);
+ 	console.log(">        MOD ROLE ID | " + config.roleIDModerator);
+ 	console.log("> RESTRICTED ROLE ID | " + config.roleIDRestricted);
  	console.log("> ========================================");
  	console.log("> ");
- 	bot.setStatus("online", "use .help");
- 	if (config.isEnabled == false) {
- 		bot.setStatusIdle();
- 	}
+ 	bot.setStatus("online", config.commandPrefixNormal + "help");
 });
 
 
+// =========================================================
 // When the bot gets disconnected
 bot.on("disconnected", () => {
 	console.log("> ");
@@ -81,9 +85,11 @@ bot.on("disconnected", () => {
 });
 
 
+// =========================================================
 // Message events
 bot.on("message", (msg) => {
 	try {
+
 
 		// ======================================================
 		// Variables
@@ -93,9 +99,9 @@ bot.on("message", (msg) => {
 		var me = bot.user // Bot Information
 	
 		// Variables from configuration
-		var botOwnerID = config.botOwnerID
-		var commandPrefixSystem = config.commandPrefixSystem // Command Prefix (Owner)
-		var commandPrefixUser = config.commandPrefixUser // Command Prefix (User)
+		var botOwnerID = config.botOwnerID // Bot Owner's ID
+		var commandPrefixSystem = config.commandPrefixSystem // Command Prefix (System)
+		var commandPrefixNormal = config.commandPrefixNormal // Command Prefix (Normal)
 	
 	
 		// ======================================================
@@ -124,30 +130,30 @@ bot.on("message", (msg) => {
 		var getInfo = {
 	
 	
-			// Returns the server information based on ServerName if it exists.
-			Server: function(ServerName) {
-				var Serv = msg.channel.server.get('name',ServerName);
+			// Returns the server information based on serverName if it exists.
+			server: (serverName) => {
+				var Serv = msg.channel.server.get('name',serverName);
 				return Serv;
 			},
 		
 		
-			// Returns the user information based on Username if it exists.
-			User: function(Username) {
-				var User = msg.channel.server.members.get('username',Username);
+			// Returns the user information based on username if it exists.
+			user: (username) => {
+				var User = msg.channel.server.members.get('username',username);
 				return User;
 			},
 		
 		
-			// Returns the role information based on RoleName if it exists.
-			Role: function(RoleName) {
-				var Role = msg.channel.server.roles.get('name',RoleName);
+			// Returns the role information based on roleName if it exists.
+			role: (roleName) => {
+				var Role = msg.channel.server.roles.get('name',roleName);
 				return Role;
 			},
 		
 		
-			// Returns the channel information based on ChannelName if it exists.
-			Channel: function(ChannelName) {
-				var Chan = bot.channels.get('name',ChannelName);
+			// Returns the channel information based on channelName if it exists.
+			channel: (channelName) => {
+				var Chan = bot.channels.get('name',channelName);
 				return Chan;
 			}
 		};
@@ -156,26 +162,26 @@ bot.on("message", (msg) => {
 		/* Gets info based on written ID */
 		var getInfoByID = {
 
-			Server: (ID) => {
-				var Serv = msg.channel.server.get('id',ID);
+			server: (id) => {
+				var Serv = msg.channel.server.get('id',id);
 				return Serv;
 			},
 		
 		
-			User: (ID) => {
-				var User = msg.channel.server.members.get('id',ID);
+			user: (id) => {
+				var User = msg.channel.server.members.get('id',id);
 				return User;
 			},
 		
 		
-			Role: (ID) => {
-				var Role = msg.channel.server.roles.get('id',ID);
+			role: (id) => {
+				var Role = msg.channel.server.roles.get('id',id);
 				return Role;
 			},
 		
 		
-			Channel: (ID) => {
-				var Chan = bot.channels.get('id',ID);
+			channel: (id) => {
+				var Chan = bot.channels.get('id',id);
 				return Chan;
 			}
 		};
@@ -184,159 +190,257 @@ bot.on("message", (msg) => {
 		// =========================================================
 		// Main Activity
 
-		switch(S[0]) {
 
-			// Test code
-			// Access: System
-			case commandPrefixSystem + "test":
-				if (msg.sender.id == botOwnerID) {
-					for (var i = 0; i < 10; i++) {
-						var msgs = msg.channel.messages
-						if (msgs[i].sender == me.id) {
-							bot.deleteMessage(msg.channel.messages[i], {}, (error) => {
-								bot.sendMessage(msg.channel,"```" + error + "```");
-							});
-						}
-					}
-				}
-			break;
+		// =========================================================
+		// System Level Access (Owner)
+		if (msg.sender.id == botOwnerID) {
+			switch(S[0]) {
+	
 
-			// Turns off the bot
-			// Access: System
-			case commandPrefixSystem + "logout":
-			case commandPrefixSystem + "off":
-				if (msg.sender.id == botOwnerID) {
-					console.log("> Logging out...");
-					wait(500, () => {
+				// Turns off the bot
+				case commandPrefixSystem + "logout":
+				case commandPrefixSystem + "off":
+					console.log("> Executed logout.");
+					wait(500, () =>{
 						bot.logout();
 					});
-				}
-			break;
-
-
-			// Sets what the bot is playing
-			// Access: System
-			case commandPrefixSystem + "status":
-			case commandPrefixSystem + "play":
-				if (msg.sender.id == botOwnerID) {
+				break;
+	
+	
+				// Sets what the bot is playing
+				case commandPrefixSystem + "status":
+				case commandPrefixSystem + "play":
 					switch (parseText(1)) {
-				
+						
 						case "with myself":
 							bot.sendMessage(msg.channel, "I can't accept that!");
 						break;
-				
+						
 						case "dead":
 							bot.sendMessage(msg.channel, "I'm not a dog! >_<");
 						break;
-			
+						
 						default:
 							bot.setStatus("online", parseText(1));
 							bot.sendMessage(msg.channel, "Playing **" + parseText(1) + "**");
 							console.log("> SETSTATUS: " + parseText(1));
 						break;
 					}
-				}
-			break;
-
-
-			// Sends a message to a channel
-			// Access: System
-			case commandPrefixSystem + "send":
-			case commandPrefixSystem + "say":
-				if (msg.sender.id == botOwnerID) {
+				break;
+	
+	
+				// Sends a message to a channel
+				case commandPrefixSystem + "send":
+				case commandPrefixSystem + "say":
 					var chan = getInfo.Channel(S[1]);
-					var Message = parseText(2);
+					var message = parsetext(2);
 					if (!chan) {
 						bot.sendMessage(msg.channel,"#" + S[1] + " doesn't exist");
 					} else {
-						if (!Message) {
+						if (!message) {
 							bot.sendMessage(msg.channel, "You didn't say what I should write.");
 						} else {
-							bot.sendMessage(chan,Message);
+							bot.sendMessage(chan,message);
 						}
 					}
-				}
-			break;
+				break;
+	
+	
+				// Show system uptime
+				case commandPrefixSystem + "up":
+				case commandPrefixSystem + "uptime":
+					var sec = (bot.uptime / 1000)
+					bot.sendMessage(msg.channel, "```Uptime: " + sec + " seconds```");
+				break;
+			}
+		}
 
 
-			// Show system uptime
-			// Access: System
-			case commandPrefixSystem + "up":
-			case commandPrefixSystem + "uptime":
-				var sec = (bot.uptime / 1000)
-				bot.sendMessage(msg.channel, "```Uptime: " + sec + " seconds```");
-			break;
+		// =========================================================
+		// Administrator Level Access
+
+		var AdminRole = getInfoByID.role(config.roleIDAdministrator)
+		if ((msg.sender.id == botOwnerID) || (bot.userHasRole(msg.sender, AdminRole))) {
+			switch(S[0]) {
 
 
-			// ====================================================
-			// Administrator Level Access 
-
-			// nothing
-
-
-			// ====================================================
-			// Moderator Level Access
-
-			// Mute command
-			// Access: Moderator
-			case commandPrefixSystem + "k":
-			case commandPrefixSystem + "kill":
-			case commandPrefixSystem + "mute":
-				var Role = getInfoByID.Role(config.roleIDRestricted);
-				if (!Role) {
-					bot.sendMessage(msg.channel, "Role was not found");
-				}
-				else {
-					for (i = 0; i < Mentions.length ; i++) {
-						bot.addMemberToRole(Mentions[i], Role);
-						bot.sendMessage(msg.channel, Mentions[i].name + " has been muted");
+				// Ban users
+				case commandPrefixNormal + "ban":
+					var Members = "";
+					for (i = 0; i < mentions.length ; i++) {
+						Members += mentions[i].name + ", "
+						bot.banMember(mentions[i],thisServer,0);
 					}
-				}
-			break;
+					bot.sendMessage(Members + " has been banned.");
+				break;
+	
 
-			// Unmute command
-			//  Access: Moderator
-			case commandPrefixSystem + "u":
-			case commandPrefixSystem + "unkill":
-			case commandPrefixSystem + "unmute":
-				var Role = getInfoByID.Role(config.roleIDRestricted);;
-				if (!Role) {
-					bot.sendMessage(msg.channel, "Role was not found");
-				}
-				else {
-					for (i = 0; i < Mentions.length ; i++) {
-						bot.removeMemberFromRole(Mentions[i], Role);
-						bot.sendMessage(msg.channel, Mentions[i].name + " is no longer muted");
+				// Removing a user from a role
+				case commandPrefixNormal + "-":
+				case commandPrefixNormal + "removerole":
+					if (mentions.length == 1) {
+						var Role = getInfo.role(parseText(mentions.length + 1));
+						if (!Role) {
+							bot.sendMessage(msg.channel, "Role not found!");
+						}
+						else {
+							bot.removeMemberFromRole(mentions[0], Role);
+							bot.sendMessage(msg.channel, mentions[0].name + " has been removed from: " + Role.name);
+						}
 					}
-				}
-			break;
+				break;
+			
+
+				// Adding a user to a role
+				case commandPrefixNormal + "+":
+				case commandPrefixNormal + "addrole":
+					if (mentions.length == 1) {
+						var Role = getInfo.role(parseText(mentions.length + 1));
+						if (!Role) {
+							bot.sendMessage(msg.channel, "Role not found!");
+						}
+						else {
+							bot.addMemberToRole(mentions[0], Role);
+							bot.sendMessage(msg.channel, mentions[0].name + " has been added to: " + Role.name);
+						}
+					}
+				break;
+			}
+		}
 
 
-			// ====================================================
-			// User Level Access
+		// =========================================================
+		// Moderator Level Access
+
+		var ModeratorRole = getInfoByID.role(config.roleIDModerator)
+		if ((msg.sender.id == botOwnerID) || (bot.userHasRole(msg.sender, AdminRole)) || (bot.userHasRole(msg.sender, ModeratorRole))) {
+			switch(S[0]) {
+
+
+				// Mute command
+				case commandPrefixNormal + "k":
+				case commandPrefixNormal + "kill":
+				case commandPrefixNormal + "mute":
+					var Role = getInfoByID.role(config.roleIDRestricted);
+					if (!Role) {
+						bot.sendMessage(msg.channel, "Role was not found");
+					}
+					else {
+						for (i = 0; i < mentions.length ; i++) {
+							bot.addMemberToRole(mentions[i], Role);
+							bot.sendMessage(msg.channel, mentions[i].name + " has been restricted");
+						}
+					}
+				break;
+	
+
+				// Unmute command
+				case commandPrefixNormal + "u":
+				case commandPrefixNormal + "unkill":
+				case commandPrefixNormal + "unmute":
+					var Role = getInfoByID.role(config.roleIDRestricted);;
+					if (!Role) {
+						bot.sendMessage(msg.channel, "Role was not found");
+					}
+					else {
+						for (i = 0; i < mentions.length ; i++) {
+							bot.removeMemberFromRole(mentions[i], Role);
+							bot.sendMessage(msg.channel, mentions[i].name + " is no longer restricted");
+						}
+					}
+				break;
+	
+	
+				// Role Information command
+				case commandPrefixNormal + "role":
+				case commandPrefixNormal + "roleinfo":
+					var roleInfo = getInfo.role(parseText(1));
+					if (!roleInfo) {
+						bot.sendMessage(msg.channel, "Role not found!");
+					}
+					else {
+						var Message = "```Role Information \n"
+						Message += "Name: " + roleInfo.name + "\n";
+						Message += "ID: " + roleInfo.id + "\n";
+						Message += "Position: " + roleInfo.position + "\n";
+						Message += "Color: " + roleInfo.colorAsHex() + "\n";
+						Message += "```"
+						bot.sendMessage(msg.channel,Message);
+					}
+				break;
+	
+	
+				// User Information
+				case commandPrefixNormal + "user":
+				case commandPrefixNormal + "userinfo":
+					if (mentions.length == 1) {
+						var User = mentions[0]
+						var userRoles = thisServer.rolesOfUser(mentions[0]);
+	
+						var Text = "**User Information**\n"
+						Text += "Name: " + User.name + "#" + User.discriminator + "\n"
+						Text += "ID: " + User.id + "\n"
+	
+						if (userRoles.length > 0) {
+	
+							Text += "Roles: " + userRoles.length + "\n"
+							
+							for (i = 0; i < userRoles.length ; i++) {
+								Text += "	" + (i + 1) + ". " + userRoles[i].name + "\n";
+							}				
+						}
+						else {
+							Text += "This user doesn't have any roles.\n";
+						}
+						Text += "Avatar: " + User.avatarURL;
+						bot.sendMessage(msg.channel, Text);
+					}
+					else {
+						bot.sendMessage(msg.channel, "You haven't mentioned anyone.");
+					}
+				break;
+	
+	
+				// Avatar
+				case commandPrefixNormal + "ava":
+				case commandPrefixNormal + "avatar":
+					if (mentions.length == 1) {
+						var User = mentions[0]
+						bot.sendMessage(msg.channel, User.avatarURL);
+					}
+					else {
+						bot.sendMessage(msg.channel, "You haven't mentioned anyone.");
+					}
+				break;
+			}
+		}
+
+
+		// =========================================================
+		// Normal Level Access
+		switch(S[0]) {
 
 
 			// Help command
-			// Access: User
-			case commandPrefixSystem + "h":
-			case commandPrefixSystem + "help":
-			case commandPrefixUser + "h":
-			case commandPrefixUser + "help":
+			case commandPrefixNormal + "h":
+			case commandPrefixNormal + "help":
 				var Message = "";
 				Message += "```Help is currently unavailable.```";
 				bot.sendMessage(msg.channel, Message);
 			break;
-
-
-		// End of main activity
 		}
+
+
+	// END OF COMMANDS
+	// =========================================================
 	}
 	catch (e) {
-		console.log("> ERROR: " + e);
+		console.log("> " + e.stack);
 		bot.sendMessage(msg.channel, "```" + e + "```");
 	}
 });
 
+// =========================================================
 // Authentication
 console.log("> ");
 console.log("> Connecting...");
