@@ -2,41 +2,43 @@
 // Discord Bot Project
 
 console.log("> Discord Bot Project");
+console.log("> " + process.version);
 console.log("> ");
+
 
 // Loading Discord.js
 console.log("> Loading discord.js");
 try {
 	var discord = require("discord.js");
 } catch (e) {
+	console.log("> ");
 	console.log("> ERROR: discord.js failed to load");
 	console.log("> " + e);
-	console.log("> " + process.version);
-	
 	process.exit();
 }
 
 
-// Reading authentication
-console.log("> Reading authentication details");
+// Loading authentication details
+console.log("> Loading authentication details");
 try {
-	var authDetails = require("./DiscordBot AuthDetails.json");
+	var authDetails = require("./DiscordBot-AuthDetails.json");
 } catch (e) {
+	console.log("> ");
 	console.log("> ERROR: Authentication details failed to load");
 	console.log("> " + e);
-	
 	process.exit();
 }
 
 
-// Reading configuration
-console.log("> Reading configurations");
+// Loading configurations
+console.log("> Loading configurations");
 try {
-	config = require("./DiscordBot Config.json");
+	config = require("./DiscordBot-Config.json");
 } catch (e) {
+	console.log("> ");
 	console.log("> ERROR: Configuration failed to load!");
 	console.log("> " + e);
-	
+	process.exit();
 }
 
 
@@ -48,16 +50,25 @@ var bot = new discord.Client();
 bot.on("ready", () => {
  	console.log("> Connected");
  	console.log("> ");
+ 	console.log("> ======================= BOT SETTINGS ===");
  	console.log(">        BOT ID: " + bot.user.id);
  	console.log(">  BOT OWNER ID: " + config.botOwnerID);
  	console.log(">       SERVERS: " + bot.servers.length);
  	console.log("> ");
- 	console.log("> SYSTEM PREFIX: " + config.commandPrefixOwner);
+ 	console.log(">       ENABLED: " + config.isEnabled);
+ 	console.log("> ");
+ 	console.log("> ==================== SERVER SETTINGS ===");
+ 	console.log("> SYSTEM PREFIX: " + config.commandPrefixSystem);
  	console.log(">   USER PREFIX: " + config.commandPrefixUser);
  	console.log("> ");
- 	console.log("> ============================================================");
+ 	console.log("> ADMIN ROLE ID: " + config.roleIDAdministrator);
+ 	console.log(">   MOD ROLE ID: " + config.roleIDModerator);
+ 	console.log("> ========================================");
  	console.log("> ");
- 	bot.setStatus("online", "maintenance");
+ 	bot.setStatus("online", "use .help");
+ 	if (config.isEnabled == false) {
+ 		bot.setStatusIdle();
+ 	}
 });
 
 
@@ -83,7 +94,7 @@ bot.on("message", (msg) => {
 	
 		// Variables from configuration
 		var botOwnerID = config.botOwnerID
-		var commandPrefixOwner = config.commandPrefixOwner // Command Prefix (Owner)
+		var commandPrefixSystem = config.commandPrefixSystem // Command Prefix (Owner)
 		var commandPrefixUser = config.commandPrefixUser // Command Prefix (User)
 	
 	
@@ -145,29 +156,30 @@ bot.on("message", (msg) => {
 		/* Gets info based on written ID */
 		var getInfoByID = {
 
-			Server: function(ID) {
+			Server: (ID) => {
 				var Serv = msg.channel.server.get('id',ID);
 				return Serv;
 			},
 		
 		
-			User: function(ID) {
+			User: (ID) => {
 				var User = msg.channel.server.members.get('id',ID);
 				return User;
 			},
 		
 		
-			Role: function(ID) {
+			Role: (ID) => {
 				var Role = msg.channel.server.roles.get('id',ID);
 				return Role;
 			},
 		
 		
-			Channel: function(ID) {
+			Channel: (ID) => {
 				var Chan = bot.channels.get('id',ID);
 				return Chan;
 			}
 		};
+
 
 		// =========================================================
 		// Main Activity
@@ -175,7 +187,8 @@ bot.on("message", (msg) => {
 		switch(S[0]) {
 
 			// Test code
-			case commandPrefixOwner + "test":
+			// Access: System
+			case commandPrefixSystem + "test":
 				if (msg.sender.id == botOwnerID) {
 					for (var i = 0; i < 10; i++) {
 						var msgs = msg.channel.messages
@@ -189,9 +202,9 @@ bot.on("message", (msg) => {
 			break;
 
 			// Turns off the bot
-			// Access: Bot Owner
-			case commandPrefixOwner + "logout":
-			case commandPrefixOwner + "off":
+			// Access: System
+			case commandPrefixSystem + "logout":
+			case commandPrefixSystem + "off":
 				if (msg.sender.id == botOwnerID) {
 					console.log("> Logging out...");
 					wait(500, () => {
@@ -200,10 +213,36 @@ bot.on("message", (msg) => {
 				}
 			break;
 
+
+			// Sets what the bot is playing
+			// Access: System
+			case commandPrefixSystem + "status":
+			case commandPrefixSystem + "play":
+				if (msg.sender.id == botOwnerID) {
+					switch (parseText(1)) {
+				
+						case "with myself":
+							bot.sendMessage(msg.channel, "I can't accept that!");
+						break;
+				
+						case "dead":
+							bot.sendMessage(msg.channel, "I'm not a dog! >_<");
+						break;
+			
+						default:
+							bot.setStatus("online", parseText(1));
+							bot.sendMessage(msg.channel, "Playing **" + parseText(1) + "**");
+							console.log("> SETSTATUS: " + parseText(1));
+						break;
+					}
+				}
+			break;
+
+
 			// Sends a message to a channel
-			// Access: Bot Owner
-			case commandPrefixOwner + "send":
-			case commandPrefixOwner + "say":
+			// Access: System
+			case commandPrefixSystem + "send":
+			case commandPrefixSystem + "say":
 				if (msg.sender.id == botOwnerID) {
 					var chan = getInfo.Channel(S[1]);
 					var Message = parseText(2);
@@ -219,19 +258,75 @@ bot.on("message", (msg) => {
 				}
 			break;
 
-			// Counts the user's role
-			case commandPrefixOwner + "rc":
-			case commandPrefixOwner + "rolecount":
-				if (msg.sender.id == botOwnerID) {
-					var Role = getInfo.Role(parseText(1));
-					if (!Role) {
-						bot.sendMessage(msg.channel, "Role not found!");
-						break;
+
+			// Show system uptime
+			// Access: System
+			case commandPrefixSystem + "up":
+			case commandPrefixSystem + "uptime":
+				var sec = (bot.uptime / 1000)
+				bot.sendMessage(msg.channel, "```Uptime: " + sec + " seconds```");
+			break;
+
+
+			// ====================================================
+			// Administrator Level Access 
+
+			// nothing
+
+
+			// ====================================================
+			// Moderator Level Access
+
+			// Mute command
+			// Access: Moderator
+			case commandPrefixSystem + "k":
+			case commandPrefixSystem + "kill":
+			case commandPrefixSystem + "mute":
+				var Role = getInfoByID.Role(config.roleIDRestricted);
+				if (!Role) {
+					bot.sendMessage(msg.channel, "Role was not found");
+				}
+				else {
+					for (i = 0; i < Mentions.length ; i++) {
+						bot.addMemberToRole(Mentions[i], Role);
+						bot.sendMessage(msg.channel, Mentions[i].name + " has been muted");
 					}
-					var Users = thisServer.usersWithRole(Role)
-					bot.sendMessage(msg.channel, "There are " + Users.length + " user(s) who have that role.");
 				}
 			break;
+
+			// Unmute command
+			//  Access: Moderator
+			case commandPrefixSystem + "u":
+			case commandPrefixSystem + "unkill":
+			case commandPrefixSystem + "unmute":
+				var Role = getInfoByID.Role(config.roleIDRestricted);;
+				if (!Role) {
+					bot.sendMessage(msg.channel, "Role was not found");
+				}
+				else {
+					for (i = 0; i < Mentions.length ; i++) {
+						bot.removeMemberFromRole(Mentions[i], Role);
+						bot.sendMessage(msg.channel, Mentions[i].name + " is no longer muted");
+					}
+				}
+			break;
+
+
+			// ====================================================
+			// User Level Access
+
+
+			// Help command
+			// Access: User
+			case commandPrefixSystem + "h":
+			case commandPrefixSystem + "help":
+			case commandPrefixUser + "h":
+			case commandPrefixUser + "help":
+				var Message = "";
+				Message += "```Help is currently unavailable.```";
+				bot.sendMessage(msg.channel, Message);
+			break;
+
 
 		// End of main activity
 		}
@@ -246,12 +341,8 @@ bot.on("message", (msg) => {
 console.log("> ");
 console.log("> Connecting...");
 if (!authDetails.token) {
-	bot.login(authDetails.username, authDetails.password, (error,token) => {
-		if (!error) {
-			conole.log("> Token: " + token);
-		} else {
-			console.log("> Failed: " + error);
-		}
+	bot.login(authDetails.username, authDetails.password, (error) => {
+		console.log("> Failed: " + error);
 	});
 } else {
 	bot.loginWithToken(authDetails.token);
