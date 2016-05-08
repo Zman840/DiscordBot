@@ -1,8 +1,7 @@
 {
 	"botOwnerID" : "84398376656850944",
-	"isEnabled" : "true",
 	"commandPrefixSystem" : "sys.",
-	"commandPrefixUser" : ".",
+	"commandPrefixNormal" : "user.",
 	"roleIDAdministrator" : "-1",
 	"roleIDModerator" : "-1",
 	"roleIDRestricted" : "-1"
