@@ -52,7 +52,7 @@ bot.on("ready", () => {
  	console.log(">  BOT OWNER ID: " + config.botOwnerID);
  	console.log(">       SERVERS: " + bot.servers.length);
  	console.log("> ");
- 	console.log("> STSTEM PREFIX: " + config.commandPrefixOwner);
+ 	console.log("> SYSTEM PREFIX: " + config.commandPrefixOwner);
  	console.log(">   USER PREFIX: " + config.commandPrefixUser);
  	console.log("> ");
  	console.log("> ============================================================");
