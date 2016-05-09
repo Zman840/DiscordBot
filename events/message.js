@@ -13,6 +13,13 @@ bot.on("message", (msg) => {
   var commandPrefixSystem = config.commandPrefixSystem; // Command Prefix (System)
   var commandPrefixNormal = config.commandPrefixNormal; // Command Prefix (Normal)
 
+  // Separate system level command from user command
+  var cPrefix = S[0].replace(/\.(.*$)/, "");
+  var command = S[0].replace(/^(.*)\./, "");
+
+  console.log(`> Prefix: ${cPrefix}`);
+  console.log(`> Command: ${command}`);
+
   // ======================================================
   // Functions
 
@@ -27,16 +34,6 @@ bot.on("message", (msg) => {
 
     return Message;
   };
-
-
-  /* Makes delays */
-  var wait = (time, callback) => {
-    var nt = new Date().getTime();
-
-    while (new Date().getTime() < nt + time) {}
-    callback();
-  };
-
 
   /* Gets info based on written string */
   var getInfo = {
@@ -106,13 +103,6 @@ bot.on("message", (msg) => {
     }
   };
 
-  var shutOff = () => {
-    console.log("> Executed logout.");
-    wait(500, () => {
-      bot.logout();
-    });
-  };
-
   // =========================================================
   // Do not respond to self
   if (msg.author.id === me.id) {
@@ -125,68 +115,10 @@ bot.on("message", (msg) => {
 
   // =========================================================
   // System Level Access (Owner)
-  if (msg.sender.id === botOwnerID) {
-    switch (S[0]) {
+  if (msg.sender.id === botOwnerID && cPrefix === commandPrefixSystem.substring(0, commandPrefixSystem.length - 1)) {
+    var sysCommands = require("./../commands/system");
 
-
-    // Turns off the bot
-    default: break;
-    case `${commandPrefixSystem}logout`:
-      shutOff();
-      break;
-    case `${commandPrefixSystem}off`:
-      shutOff();
-      break;
-
-
-      // Sets what the bot is playing
-    case `${commandPrefixSystem}status`:
-    case `${commandPrefixSystem}play`:
-      switch (parseText(1)) {
-
-      case "with myself":
-        bot.sendMessage(msg.channel, "I can't accept that!");
-        break;
-
-      case "dead":
-        bot.sendMessage(msg.channel, "I'm not a dog! >_<");
-        break;
-
-      default:
-        bot.setStatus("online", parseText(1));
-        bot.sendMessage(msg.channel, `Playing **${parseText(1)}**`);
-        console.log(`> SETSTATUS: ${parseText(1)}`);
-        break;
-      }
-      break;
-
-
-      // Sends a message to a channel
-    case `${commandPrefixSystem}send`:
-    case `${commandPrefixSystem}say`:
-      var chan = getInfo.channel(S[1]);
-      var message = parseText(2);
-
-      if (!chan) {
-        bot.sendMessage(msg.channel, `#${S[1]} doesn't exist`);
-      } else {
-        if (!message) {
-          bot.sendMessage(msg.channel, "You didn't say what I should write.");
-        } else {
-          bot.sendMessage(chan, message);
-        }
-      }
-      break;
-
-
-      // Show system uptime
-    case `${commandPrefixSystem}up`:
-    case `${commandPrefixSystem}uptime`:
-      var sec = bot.uptime / 1000;
-
-      bot.sendMessage(msg.channel, `\`\`\`Uptime: ${sec} seconds\`\`\``);
-      break;
-    }
+    sysCommands.execute(command, parseText(1), msg, getInfo);
   }
 
   // =========================================================
