@@ -17,9 +17,6 @@ bot.on("message", (msg) => {
   var cPrefix = S[0].replace(/\.(.*$)/, "");
   var command = S[0].replace(/^(.*)\./, "");
 
-  console.log(`> Prefix: ${cPrefix}`);
-  console.log(`> Command: ${command}`);
-
   // ======================================================
   // Functions
 
@@ -112,74 +109,26 @@ bot.on("message", (msg) => {
   // =========================================================
   // Main Activity
 
-
   // =========================================================
   // System Level Access (Owner)
   if (msg.sender.id === botOwnerID && cPrefix === commandPrefixSystem.substring(0, commandPrefixSystem.length - 1)) {
     var sysCommands = require("./../commands/system");
 
     sysCommands.execute(command, parseText(1), msg, getInfo);
+
+    return;
   }
 
   // =========================================================
   // Administrator Level Access
-  try {
     var AdminRole = config.roleIDAdministrator === -1 ? null : getInfoByID.role(config.roleIDAdministrator);
     var AdminAccess = AdminRole === null ? false : bot.userHasRole(msg.sender, AdminRole);
 
     if (msg.sender.id === botOwnerID || AdminAccess) {
-      switch (S[0]) {
-      default: break;
-        // Ban users
-      case `${commandPrefixNormal}ban`:
-        var Members = "";
+      var AdminCommands = require("./../commands/admin");
 
-        console.log(mentions);
-        for (var i = 0; i < mentions.length; i++) {
-          Members += `${mentions[i].name}, `;
-          bot.banMember(mentions[i], thisServer, 0);
-        }
-        bot.sendMessage(msg.channel, `${Members} has been banned.`);
-        break;
-
-
-        // Removing a user from a role
-      case `${commandPrefixNormal}-`:
-      case `${commandPrefixNormal}removerole`:
-        if (mentions.length === 1) {
-          var Role = getInfo.role(parseText(mentions.length + 1));
-
-          if (!Role) {
-            bot.sendMessage(msg.channel, "Role not found!");
-          } else {
-            bot.removeMemberFromRole(mentions[0], Role);
-            bot.sendMessage(msg.channel, `${mentions[0].name}  has been removed from: ${Role.name}`);
-          }
-        }
-        break;
-
-        // Adding a user to a role
-      case `${commandPrefixNormal}+`:
-      case `${commandPrefixNormal}addrole`:
-        if (mentions.length === 1) {
-          var Role = getInfo.role(parseText(mentions.length + 1));
-
-          if (!Role) {
-            bot.sendMessage(msg.channel, "Role not found!");
-          } else {
-            bot.addMemberToRole(mentions[0], Role);
-            bot.sendMessage(msg.channel, `${mentions[0].name} has been added to: ${Role.name}`);
-          }
-        }
-        break;
-      }
+      AdminCommands.execute(command, parseText(1), msg, getInfo);
     }
-  } catch (e) {
-    console.log("> error with Admin access");
-    console.log(`> ${e}`);
-
-    return;
-  }
 
   // =========================================================
   // Moderator Level Access
@@ -216,7 +165,6 @@ bot.on("message", (msg) => {
       var Role = config.roleIDRestricted === -1 ? "" : getInfoByID.role(config.roleIDRestricted);
 
       if (!Role) {
-        console.log("> Role unmute accessed");
         bot.sendMessage(msg.channel, "Role was not found");
       } else {
         for (i = 0; i < mentions.length; i++) {
