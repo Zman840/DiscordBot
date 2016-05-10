@@ -13,9 +13,23 @@ bot.on("message", (msg) => {
   var commandPrefixSystem = config.commandPrefixSystem; // Command Prefix (System)
   var commandPrefixNormal = config.commandPrefixNormal; // Command Prefix (Normal)
 
-  // Separate system level command from user command
-  var cPrefix = S[0].replace(/\.(.*$)/, "");
-  var command = S[0].replace(/^(.*)\./, "");
+  // Separate system level command from user command; updated for d ynamics
+  var cPrefix = "";
+  var command = "";
+
+  if (S[0].match(commandPrefixSystem)) {
+    cPrefix = S[0].substr(0, commandPrefixSystem.length);
+    command = S[0].substr(commandPrefixSystem.length);
+  } else if (S[0].match(commandPrefixNormal)) {
+    cPrefix = S[0].substr(0, commandPrefixNormal.length);
+    command = S[0].substr(commandPrefixNormal.length);
+  } else {
+    // prevent responses if command isn't used. Can be used as something for general messages.
+    return;
+  }
+  console.log(`> Prefix: ${cPrefix}`);
+  console.log(`> Command: ${command}`);
+  console.log(">");
 
   // ======================================================
   // Functions
@@ -111,148 +125,53 @@ bot.on("message", (msg) => {
 
   // =========================================================
   // System Level Access (Owner)
-  if (msg.sender.id === botOwnerID && cPrefix === commandPrefixSystem.substring(0, commandPrefixSystem.length - 1)) {
+  if (msg.sender.id === botOwnerID && cPrefix === commandPrefixSystem) {
     var sysCommands = require("./../commands/system");
 
-    sysCommands.execute(command, parseText(1), msg, getInfo);
-
-    return;
+    // go to next access level if not found
+    if (sysCommands.execute(command, parseText(1), msg, getInfo)) {
+      return;
+    }
   }
 
   // =========================================================
   // Administrator Level Access
-    var AdminRole = config.roleIDAdministrator === -1 ? null : getInfoByID.role(config.roleIDAdministrator);
-    var AdminAccess = AdminRole === null ? false : bot.userHasRole(msg.sender, AdminRole);
+  var AdminRole = config.roleIDAdministrator === -1 ? null : getInfoByID.role(config.roleIDAdministrator);
+  var AdminAccess = AdminRole === null && cPrefix === commandPrefixNormal ? false : bot.userHasRole(msg.sender, AdminRole);
 
-    if (msg.sender.id === botOwnerID || AdminAccess) {
-      var AdminCommands = require("./../commands/admin");
+  // go to next access level if not found
+  if (msg.sender.id === botOwnerID || AdminAccess) {
+    var AdminCommands = require("./../commands/admin");
 
-      AdminCommands.execute(command, parseText(1), msg, getInfo);
+    if (AdminCommands.execute(command, parseText(1), msg, getInfo)) {
+      return;
     }
+  }
 
   // =========================================================
   // Moderator Level Access
   var ModeratorRole = config.roleIDModerator === -1 ? null : getInfoByID.role(config.roleIDModerator);
-  var ModeratorAccess = ModeratorRole === null ? false : bot.userHasRole(msg.sender, ModeratorRole);
+  var ModeratorAccess = ModeratorRole === null && cPrefix === commandPrefixNormal ? false : bot.userHasRole(msg.sender, ModeratorRole);
 
   if (msg.sender.id === botOwnerID || AdminAccess || ModeratorAccess) {
-    switch (S[0]) {
+    var ModeratorCommands = require("./../commands/mod");
 
-
-    // Mute command
-    default: break;
-    case `${commandPrefixNormal}k`:
-    case `${commandPrefixNormal}kill`:
-    case `${commandPrefixNormal}mute`:
-      var Role = config.roleIDRestricted === -1 ? null : getInfoByID.role(config.roleIDRestricted);
-
-      if (!Role) {
-        console.log("> Role Mute accessed");
-        bot.sendMessage(msg.channel, "Role was not found");
-      } else {
-        for (var i = 0; i < mentions.length; i++) {
-          bot.addMemberToRole(mentions[i], Role);
-          bot.sendMessage(msg.channel, `${mentions[i].name} has been restricted`);
-        }
-      }
-      break;
-
-
-      // Unmute command
-    case `${commandPrefixNormal}u`:
-    case `${commandPrefixNormal}unkill`:
-    case `${commandPrefixNormal}unmute`:
-      var Role = config.roleIDRestricted === -1 ? "" : getInfoByID.role(config.roleIDRestricted);
-
-      if (!Role) {
-        bot.sendMessage(msg.channel, "Role was not found");
-      } else {
-        for (i = 0; i < mentions.length; i++) {
-          bot.removeMemberFromRole(mentions[i], Role);
-          bot.sendMessage(msg.channel, `${mentions[i].name} is no longer restricted`);
-        }
-      }
-      break;
-
-
-      // Role Information command
-    case `${commandPrefixNormal}role`:
-    case `${commandPrefixNormal}roleinfo`:
-      var roleInfo = getInfo.role(parseText(1));
-
-      if (!roleInfo) {
-        bot.sendMessage(msg.channel, "Role not found!");
-      } else {
-        var Message = `\`\`\`Role Information\n`;
-
-        Message += `Name: ${roleInfo.name}\n`;
-        Message += `ID: ${roleInfo.id}\n`;
-        Message += `Position: ${roleInfo.position}\n`;
-        Message += `Color: ${roleInfo.colorAsHex()}\n`;
-        Message += "```";
-        bot.sendMessage(msg.channel, Message);
-      }
-      break;
-
-
-      // User Information
-    case `${commandPrefixNormal}user`:
-    case `${commandPrefixNormal}userinfo`:
-      if (mentions.length === 1) {
-        var User = mentions[0];
-        var userRoles = thisServer.rolesOfUser(mentions[0]);
-        var Text = "**User Information**\n";
-
-        Text += `Name: ${User.name}#${User.discriminator}\n`;
-        Text += `ID: ${User.id}\n`;
-
-        if (userRoles.length > 0) {
-
-          Text += `Roles: ${userRoles.length}\n`;
-
-          for (var i = 0; i < userRoles.length; i++) {
-            Text += ` ${i + 1}. ${userRoles[i].name}\n`;
-          }
-        } else {
-          Text += "This user doesn't have any roles.\n";
-        }
-        Text += `Avatar: ${User.avatarURL}`;
-        bot.sendMessage(msg.channel, Text);
-      } else {
-        bot.sendMessage(msg.channel, "You haven't mentioned anyone.");
-      }
-      break;
-
-
-      // Avatar
-    case `${commandPrefixNormal}ava`:
-    case `${commandPrefixNormal}avatar`:
-      if (mentions.length === 1) {
-        var User = mentions[0];
-
-        bot.sendMessage(msg.channel, User.avatarURL);
-      } else {
-        bot.sendMessage(msg.channel, "You haven't mentioned anyone.");
-      }
-      break;
+    // go to next access level if not found
+    if (ModeratorCommands.execute(command, parseText(1), msg, getInfo, getInfoByID)) {
+      return;
     }
   }
 
   // =========================================================
   // Normal Level Access
-  switch (S[0]) {
 
-  default: break;
-    // Help command
-  case `${commandPrefixNormal}h`:
-  case `${commandPrefixNormal}help`:
-    var Message = "";
+  if (cPrefix === commandPrefixNormal) {
+    var UserCommands = require("./../commands/user");
 
-    Message += "```Help is currently unavailable.```";
-    bot.sendMessage(msg.channel, Message);
-    break;
+    if (UserCommands.execute(command, parseText(1), msg, getInfo, getInfoByID)) {
+      return;
+    }
   }
-
 
     // END OF COMMANDS
     // =========================================================

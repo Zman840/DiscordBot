@@ -1,32 +1,42 @@
 "use strict";
 
 class AdminCommands {
+  // check to see if a command is the same. If not, go to next access level..
   execute(command, text, msg, getInfo) {
     this.mentions = msg.mentions;     // Array of mentions
     this.server = msg.channel.server; // Current Server
     switch (command) {
-    default: break;
+    default:
+      this.success = false;
+      break;
     case "ban": {
       this.ban(text, msg);
+      this.success = true;
       break;
     }
     case "-": {
       this.removeRole(text, msg, getInfo);
+      this.success = true;
       break;
     }
     case "removerole": {
       this.removeRole(text, msg, getInfo);
+      this.success = true;
       break;
     }
     case "+": {
       this.addRole(text, msg, getInfo);
+      this.success = true;
       break;
     }
     case "addrole": {
       this.addRole(text, msg, getInfo);
+      this.success = true;
       break;
     }
     }
+
+    return this.success;
   }
 
   // Ban users

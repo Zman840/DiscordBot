@@ -13,39 +13,52 @@ var wait = (time, callback) => {
 class SystemCommands {
   execute(command, text, msg, info) {
     switch (command) {
-    default: break;
+    default:
+      this.success = false;
+      break;
     case "logout": {
       this.shutOff();
+      this.success = true;
       break;
     }
     case "off": {
       this.shutOff();
+      this.success = true;
       break;
     }
     case "status": {
       this.setStatus(text, msg);
+      this.success = true;
       break;
     }
     case "play": {
       this.setStatus(text, msg);
+      this.success = true;
       break;
     }
     case "send": {
       this.send(msg, text, info);
+      this.success = true;
       break;
     }
     case "say": {
       this.send(msg, text, info);
+      this.success = true;
       break;
     }
     case "up": {
       this.uptime(msg);
+      this.success = true;
       break;
     }
     case "uptime": {
       this.uptime(msg);
+      this.success = true;
       break;
-    } }
+    }
+    }
+
+    return this.success;
   }
 
   // turns off bot
